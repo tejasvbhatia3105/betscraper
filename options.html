@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BetScraper Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="logo">
+        <img src="icons/icon48.png" alt="BetScraper" class="logo-icon">
+        <h1>BetScraper Settings</h1>
+      </div>
+      <div class="version">v1.0</div>
+    </header>
+
+    <main class="main">
+      <form id="settingsForm" class="settings-form">
+        
+        <!-- API Configuration -->
+        <section class="settings-section">
+          <h2>API Configuration</h2>
+          <p class="section-description">Configure your API keys for LLM analysis and market data.</p>
+          
+          <div class="form-group">
+            <label for="openaiApiKey">OpenAI API Key</label>
+            <div class="input-group">
+              <input 
+                type="password" 
+                id="openaiApiKey" 
+                name="openaiApiKey" 
+                placeholder="sk-..."
+                class="form-input"
+              >
+              <button type="button" id="toggleApiKey" class="btn btn-icon" title="Show/Hide API Key">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
+            <div class="form-help">
+              Required for content analysis. Get your API key from 
+              <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI Platform</a>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="llmModel">LLM Model</label>
+            <select id="llmModel" name="llmModel" class="form-select">
+              <option value="gpt-4o-mini">GPT-4o Mini (Recommended)</option>
+              <option value="gpt-4o">GPT-4o</option>
+              <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+            </select>
+            <div class="form-help">Choose the LLM model for content analysis. GPT-4o Mini offers the best balance of speed and accuracy.</div>
+          </div>
+        </section>
+
+        <!-- Analysis Settings -->
+        <section class="settings-section">
+          <h2>Analysis Settings</h2>
+          <p class="section-description">Control how and when content is analyzed.</p>
+
+          <div class="form-group">
+            <div class="checkbox-group">
+              <input type="checkbox" id="enabled" name="enabled" checked>
+              <label for="enabled">Enable BetScraper</label>
+            </div>
+            <div class="form-help">Master switch to enable/disable the extension.</div>
+          </div>
+
+          <div class="form-group">
+            <div class="checkbox-group">
+              <input type="checkbox" id="autoAnalyze" name="autoAnalyze" checked>
+              <label for="autoAnalyze">Auto-analyze pages</label>
+            </div>
+            <div class="form-help">Automatically analyze page content when it changes.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="analysisDelay">Analysis Delay (seconds)</label>
+            <input 
+              type="range" 
+              id="analysisDelay" 
+              name="analysisDelay" 
+              min="2" 
+              max="30" 
+              value="5" 
+              class="form-range"
+            >
+            <div class="range-value">
+              <span id="analysisDelayValue">5</span> seconds
+            </div>
+            <div class="form-help">Delay before analyzing content after page changes to avoid excessive API calls.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="maxRecommendations">Maximum Recommendations</label>
+            <input 
+              type="range" 
+              id="maxRecommendations" 
+              name="maxRecommendations" 
+              min="1" 
+              max="10" 
+              value="5" 
+              class="form-range"
+            >
+            <div class="range-value">
+              <span id="maxRecommendationsValue">5</span> recommendations
+            </div>
+            <div class="form-help">Maximum number of betting recommendations to show at once.</div>
+          </div>
+        </section>
+
+        <!-- Platform Settings -->
+        <section class="settings-section">
+          <h2>Platform Settings</h2>
+          <p class="section-description">Choose which prediction markets to include in recommendations.</p>
+
+          <div class="form-group">
+            <div class="checkbox-group">
+              <input type="checkbox" id="includePolymarket" name="includePolymarket" checked>
+              <label for="includePolymarket">Include Polymarket</label>
+            </div>
+            <div class="form-help">Show betting opportunities from Polymarket.</div>
+          </div>
+
+          <div class="form-group">
+            <div class="checkbox-group">
+              <input type="checkbox" id="includeKalshi" name="includeKalshi" checked>
+              <label for="includeKalshi">Include Kalshi</label>
+            </div>
+            <div class="form-help">Show betting opportunities from Kalshi.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="categories">Preferred Categories</label>
+            <div class="checkbox-grid">
+              <div class="checkbox-group">
+                <input type="checkbox" id="categoryPolitics" name="categoryPolitics" checked>
+                <label for="categoryPolitics">Politics</label>
+              </div>
+              <div class="checkbox-group">
+                <input type="checkbox" id="categoryCrypto" name="categoryCrypto" checked>
+                <label for="categoryCrypto">Cryptocurrency</label>
+              </div>
+              <div class="checkbox-group">
+                <input type="checkbox" id="categorySports" name="categorySports" checked>
+                <label for="categorySports">Sports</label>
+              </div>
+              <div class="checkbox-group">
+                <input type="checkbox" id="categoryFinance" name="categoryFinance" checked>
+                <label for="categoryFinance">Finance</label>
+              </div>
+              <div class="checkbox-group">
+                <input type="checkbox" id="categoryTech" name="categoryTech" checked>
+                <label for="categoryTech">Technology</label>
+              </div>
+              <div class="checkbox-group">
+                <input type="checkbox" id="categoryEntertainment" name="categoryEntertainment">
+                <label for="categoryEntertainment">Entertainment</label>
+              </div>
+            </div>
+            <div class="form-help">Only show recommendations for selected categories.</div>
+          </div>
+        </section>
+
+        <!-- Privacy & Data -->
+        <section class="settings-section">
+          <h2>Privacy & Data</h2>
+          <p class="section-description">Control how your data is handled.</p>
+
+          <div class="form-group">
+            <div class="checkbox-group">
+              <input type="checkbox" id="saveHistory" name="saveHistory">
+              <label for="saveHistory">Save analysis history</label>
+            </div>
+            <div class="form-help">Keep a local history of analyzed pages and recommendations.</div>
+          </div>
+
+          <div class="form-group">
+            <div class="checkbox-group">
+              <input type="checkbox" id="anonymizeData" name="anonymizeData" checked>
+              <label for="anonymizeData">Anonymize data</label>
+            </div>
+            <div class="form-help">Remove personal information before sending content for analysis.</div>
+          </div>
+
+          <div class="form-group">
+            <button type="button" id="clearData" class="btn btn-outline">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="m19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+              Clear All Data
+            </button>
+            <div class="form-help">Remove all stored recommendations, history, and cache.</div>
+          </div>
+        </section>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Save Settings
+          </button>
+          <button type="button" id="resetSettings" class="btn btn-outline">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="1 4 1 10 7 10"></polyline>
+              <polyline points="23 20 23 14 17 14"></polyline>
+              <path d="m20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+            </svg>
+            Reset to Defaults
+          </button>
+        </div>
+      </form>
+
+      <!-- Status Messages -->
+      <div id="statusMessage" class="status-message" style="display: none;">
+        <div class="status-content">
+          <span class="status-text"></span>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-links">
+        <a href="https://github.com/yourusername/betscraper" target="_blank">GitHub</a>
+        <a href="https://github.com/yourusername/betscraper/issues" target="_blank">Report Issues</a>
+        <a href="https://github.com/yourusername/betscraper#readme" target="_blank">Documentation</a>
+      </div>
+      <div class="footer-text">
+        <p>BetScraper helps you find relevant betting opportunities based on web content you're viewing.</p>
+        <p><strong>Disclaimer:</strong> This extension is for informational purposes only. Please bet responsibly.</p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html> 

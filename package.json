@@ -1,0 +1,72 @@
+{
+  "name": "betscraper",
+  "version": "1.0.0",
+  "description": "AI-powered Chrome extension that suggests relevant betting opportunities based on screen content",
+  "main": "background.js",
+  "scripts": {
+    "build": "echo 'Extension ready for loading in Chrome'",
+    "lint": "eslint *.js",
+    "test": "echo 'No tests configured yet'",
+    "dev": "echo 'Load extension in Chrome at chrome://extensions/ with Developer Mode enabled'",
+    "package": "zip -r betscraper-extension.zip . -x '*.git*' 'node_modules/*' '*.DS_Store' 'package-lock.json'"
+  },
+  "keywords": [
+    "chrome-extension",
+    "betting",
+    "prediction-markets",
+    "polymarket",
+    "kalshi",
+    "ai",
+    "openai",
+    "content-analysis",
+    "screen-monitoring"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/betscraper.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/betscraper/issues"
+  },
+  "homepage": "https://github.com/yourusername/betscraper#readme",
+  "devDependencies": {
+    "eslint": "^8.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "manifest": {
+    "version": "3",
+    "name": "BetScraper - Smart Betting Assistant",
+    "description": "AI-powered Chrome extension that suggests relevant betting opportunities based on screen content"
+  },
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "storage",
+    "scripting",
+    "history"
+  ],
+  "apis": {
+    "openai": {
+      "required": true,
+      "purpose": "Content analysis and recommendation generation"
+    },
+    "polymarket": {
+      "required": false,
+      "purpose": "Fetching prediction market data"
+    },
+    "kalshi": {
+      "required": false,
+      "purpose": "Fetching prediction market data"
+    }
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "betscraper@yourcompany.com",
+      "strict_min_version": "90.0"
+    }
+  }
+} 

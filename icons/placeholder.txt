@@ -1,0 +1,16 @@
+This directory should contain the following icon files for the Chrome extension:
+
+- icon16.png (16x16 pixels)
+- icon32.png (32x32 pixels)  
+- icon48.png (48x48 pixels)
+- icon128.png (128x128 pixels)
+
+You can generate these icons using any image editor or AI image generator.
+
+Suggested icon design:
+- Modern, clean design
+- Gambling/betting theme (dice, charts, etc.)
+- Blue/purple gradient to match the extension theme
+- Clear at small sizes
+
+For now, you can use simple colored squares as placeholders until you create proper icons. 
