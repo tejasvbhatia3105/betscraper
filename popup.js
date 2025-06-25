@@ -1,9 +1,10 @@
-// Popup JavaScript for BetScraper
+// Popup JavaScript for BetScraper - Screen Capture Mode
 
 class PopupManager {
   constructor() {
     this.currentTab = null;
     this.recommendations = [];
+    this.isAnalyzing = false;
     this.init();
   }
 
@@ -13,6 +14,7 @@ class PopupManager {
     this.setupMessageListeners();
     await this.loadRecommendations();
     this.updatePageInfo();
+    this.checkAnalysisStatus();
   }
 
   async getCurrentTab() {
@@ -21,19 +23,16 @@ class PopupManager {
   }
 
   setupEventListeners() {
-    // Analyze button
+    // Main capture and analyze button
     document.getElementById('analyzeBtn').addEventListener('click', () => {
-      this.analyzeCurrentPage();
-    });
-
-    // Capture button
-    document.getElementById('captureBtn').addEventListener('click', () => {
       this.captureAndAnalyze();
     });
 
+    // Note: Capture button removed from UI, now using single analyze button
+
     // Refresh button
     document.getElementById('refreshBtn').addEventListener('click', () => {
-      this.refreshRecommendations();
+      this.loadRecommendations();
     });
 
     // Settings button
@@ -60,108 +59,134 @@ class PopupManager {
 
   setupMessageListeners() {
     chrome.runtime.onMessage.addListener((message) => {
-      if (message.action === 'newRecommendations') {
-        this.updateRecommendations(message.recommendations);
+      if (message.action === 'analysisComplete') {
+        this.handleAnalysisComplete(message.recommendations);
       }
     });
   }
 
-  async analyzeCurrentPage() {
-    if (!this.currentTab) return;
-
-    this.showLoadingState();
-    this.updateStatus('Analyzing page content...', true);
-
-    try {
-      // Request content extraction from the content script
-      const response = await chrome.tabs.sendMessage(this.currentTab.id, {
-        action: 'extractContent'
-      });
-
-      if (response) {
-        // Send content to background script for analysis
-        const analysisResponse = await chrome.runtime.sendMessage({
-          action: 'analyzeContent',
-          data: response
-        });
-
-        this.updateStatus('Analysis completed', false);
-        
-        // Recommendations will be updated via message listener
-        setTimeout(() => this.loadRecommendations(), 2000);
-      }
-    } catch (error) {
-      console.error('Analysis error:', error);
-      this.updateStatus('Analysis failed', false);
-      this.showEmptyState();
-    }
-  }
-
   async captureAndAnalyze() {
-    if (!this.currentTab) return;
+    if (!this.currentTab || this.isAnalyzing) return;
 
+    console.log('🎲 BetScraper Popup: Starting screen capture analysis');
+    this.isAnalyzing = true;
     this.showLoadingState();
-    this.updateStatus('Capturing screen...', true);
+    this.updateStatus('📸 Capturing screen for analysis...', true);
 
     try {
-      // Capture screenshot via background script
-      const captureResponse = await chrome.runtime.sendMessage({
-        action: 'captureTab'
+      // Check if content script is loaded
+      const pingResponse = await chrome.tabs.sendMessage(this.currentTab.id, {
+        action: 'getStatus'
+      }).catch(() => null);
+
+      if (!pingResponse) {
+        throw new Error('Content script not loaded. Please refresh the page.');
+      }
+
+      // Request screen capture from content script
+      await chrome.tabs.sendMessage(this.currentTab.id, {
+        action: 'captureScreen'
       });
 
-      if (captureResponse.screenshot) {
-        this.updateStatus('Analyzing captured content...', true);
-        
-        // Also get text content
-        const contentResponse = await chrome.tabs.sendMessage(this.currentTab.id, {
-          action: 'extractContent'
-        });
+      this.updateStatus('🤖 AI is analyzing your screen...', true);
 
-        // Combine screenshot and text data
-        const combinedData = {
-          ...contentResponse,
-          screenshot: captureResponse.screenshot
-        };
+      // Poll for completion
+      this.pollAnalysisStatus();
 
-        // Send to background for analysis
-        await chrome.runtime.sendMessage({
-          action: 'analyzeContent',
-          data: combinedData
-        });
-
-        this.updateStatus('Analysis completed', false);
-        setTimeout(() => this.loadRecommendations(), 2000);
-      }
     } catch (error) {
-      console.error('Capture error:', error);
-      this.updateStatus('Capture failed', false);
+      console.error('🎲 BetScraper Popup: Capture error:', error);
+      this.updateStatus(`❌ Error: ${error.message}`, false);
       this.showEmptyState();
+      this.isAnalyzing = false;
     }
   }
 
-  async refreshRecommendations() {
-    this.showLoadingState();
-    this.updateStatus('Refreshing markets...', true);
+  async pollAnalysisStatus() {
+    let attempts = 0;
+    const maxAttempts = 30; // 30 seconds max
+    
+    const checkStatus = async () => {
+      attempts++;
+      
+      try {
+        const status = await chrome.runtime.sendMessage({
+          action: 'getAnalysisStatus'
+        });
 
+        if (!status.isAnalyzing) {
+          // Analysis complete, load recommendations
+          this.isAnalyzing = false;
+          await this.loadRecommendations();
+          return;
+        }
+
+        if (attempts >= maxAttempts) {
+          throw new Error('Analysis timeout');
+        }
+
+        // Continue polling
+        setTimeout(checkStatus, 1000);
+
+      } catch (error) {
+        console.error('🎲 BetScraper Popup: Status check error:', error);
+        this.updateStatus('❌ Analysis failed', false);
+        this.showEmptyState();
+        this.isAnalyzing = false;
+      }
+    };
+
+    checkStatus();
+  }
+
+  handleAnalysisComplete(recommendations) {
+    console.log('🎲 BetScraper Popup: Analysis complete, got recommendations:', recommendations);
+    this.isAnalyzing = false;
+    
+    if (recommendations && recommendations.length > 0) {
+      this.updateRecommendations(recommendations);
+      this.updateStatus('✅ Found betting opportunities!', false);
+    } else {
+      this.showEmptyState();
+      this.updateStatus('🔍 No relevant markets found', false);
+    }
+  }
+
+  async checkAnalysisStatus() {
     try {
-      await chrome.runtime.sendMessage({ action: 'refreshMarkets' });
-      await this.loadRecommendations();
-      this.updateStatus('Markets refreshed', false);
+      const status = await chrome.runtime.sendMessage({
+        action: 'getAnalysisStatus'
+      });
+
+      if (status.isAnalyzing) {
+        this.isAnalyzing = true;
+        this.showLoadingState();
+        this.updateStatus('🤖 Analysis in progress...', true);
+        this.pollAnalysisStatus();
+      }
     } catch (error) {
-      console.error('Refresh error:', error);
-      this.updateStatus('Refresh failed', false);
+      console.log('🎲 BetScraper Popup: No analysis in progress');
     }
   }
 
   async loadRecommendations() {
     try {
-      const recommendations = await chrome.runtime.sendMessage({
+      console.log('🎲 BetScraper Popup: Loading recommendations...');
+      
+      const response = await chrome.runtime.sendMessage({
         action: 'getRecommendations'
       });
 
-      this.updateRecommendations(recommendations || []);
+      console.log('🎲 BetScraper Popup: Got recommendations response:', response);
+      
+      const recommendations = response?.recommendations || [];
+      this.updateRecommendations(recommendations);
+
+      if (recommendations.length === 0 && !this.isAnalyzing) {
+        this.showEmptyState();
+      }
+
     } catch (error) {
-      console.error('Load recommendations error:', error);
+      console.error('🎲 BetScraper Popup: Load recommendations error:', error);
       this.showEmptyState();
     }
   }
@@ -170,7 +195,9 @@ class PopupManager {
     this.recommendations = recommendations;
     
     if (recommendations.length === 0) {
-      this.showEmptyState();
+      if (!this.isAnalyzing) {
+        this.showEmptyState();
+      }
     } else {
       this.showRecommendations(recommendations);
     }
@@ -200,8 +227,7 @@ class PopupManager {
     container.innerHTML = '';
 
     recommendations.forEach(recommendation => {
-      const card = this.createRecommendationCard(recommendation);
-      container.appendChild(card);
+      container.appendChild(this.createRecommendationCard(recommendation));
     });
   }
 

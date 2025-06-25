@@ -2,7 +2,7 @@
   "name": "betscraper",
   "version": "1.0.0",
   "description": "AI-powered Chrome extension that suggests relevant betting opportunities based on screen content",
-  "main": "background.js",
+  "main": "background-simple.js",
   "scripts": {
     "build": "echo 'Extension ready for loading in Chrome'",
     "lint": "eslint *.js",
